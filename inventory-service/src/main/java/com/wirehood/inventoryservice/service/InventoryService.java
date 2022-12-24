@@ -1,5 +1,6 @@
 package com.wirehood.inventoryservice.service;
 
+import com.wirehood.inventoryservice.dto.InventoryRequest;
 import com.wirehood.inventoryservice.dto.InventoryResponse;
 import com.wirehood.inventoryservice.model.Inventory;
 import com.wirehood.inventoryservice.repository.InventoryRepository;
@@ -36,13 +37,17 @@ public class InventoryService {
         Set<String> notInStockSkuCodes = new HashSet<>(skuCodes);
         notInStockSkuCodes.removeAll(inStockSkuCodes);
 
-        log.info("Sku codes not in stock: {}", notInStockSkuCodes);
+        log.info("Sku codes not in stock: {}.", notInStockSkuCodes);
 
         return inventoryResponses;
     }
 
-    public void save(Inventory inventory) {
+    public void save(InventoryRequest inventoryRequest) {
+        Inventory inventory = Inventory.builder()
+                .skuCode(inventoryRequest.getSkuCode())
+                .quantity(inventoryRequest.getQuantity())
+                .build();
         inventoryRepository.save(inventory);
-        log.info("Inventory {} saved", inventory.getId());
+        log.info("Inventory {} saved.", inventory.toString());
     }
 }

@@ -55,7 +55,7 @@ public class OrderService {
 
         if (allProductsInStock) {
             orderRepository.save(order);
-            log.info("Order {} saved", order.getId());
+            log.info("Order {} saved.", order.getId());
         } else {
             throw new IllegalArgumentException("One or more products are not in stock, try again later");
         }
