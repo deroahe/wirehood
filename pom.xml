@@ -20,6 +20,7 @@
         <module>inventory-service</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
+        <module>authentication-service</module>
     </modules>
 
     <properties>
