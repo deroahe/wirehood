@@ -1,0 +1,69 @@
+services:
+  discovery-server:
+    image: discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    ports:
+      - "8099:8099"
+    depends_on:
+      - discovery-server
+
+  authentication-service:
+    image: authentication-service
+    depends_on:
+      - discovery-server
+      - mysql-server
+
+  order-service:
+    image: order-service
+    depends_on:
+      - discovery-server
+      - mysql-server
+
+  inventory-service:
+    image: inventory-service
+    depends_on:
+      - discovery-server
+      - mysql-server
+
+  product-service:
+    image: product-service
+    depends_on:
+      - discovery-server
+      - mongo-server
+    ports:
+      - 3000:3000
+    environment:
+      - MONGODB_CONNSTRING=mongodb://root:admin@mongo-server
+
+  mysql-server:
+    image: mysql:5.7
+    container_name: mysql-server
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 'admin'
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-volume:/var/lib/minesql
+
+  mongo-server:
+    image: mongo
+    restart: unless-stopped
+    container_name: mongo-server
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: admin
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-volume:/data/db
+
+volumes:
+  mysql-volume:
+  mongo-volume:
