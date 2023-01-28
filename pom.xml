@@ -32,6 +32,7 @@
         <io.jsonwebtoken.version>0.9.1</io.jsonwebtoken.version>
         <javax.servlet.version>2.5</javax.servlet.version>
         <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
+        <org.hibernate.version>6.1.6.Final</org.hibernate.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +69,14 @@
                 <groupId>javax.xml.bind</groupId>
                 <artifactId>jaxb-api</artifactId>
                 <version>${javax.xml.bind.version}</version><!--$NO-MVN-MAN-VER$-->
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-jpamodelgen</artifactId>
+                <scope>provided</scope>
+                <type>pom</type>
+                <version>${org.hibernate.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
