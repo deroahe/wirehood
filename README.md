@@ -7,6 +7,18 @@
         <p style="text-align: center">a <i>spring boot microservices project</i></p>
         <p>wirehood is an infrastructure to build microservices upon</p>
     </div>
+    <h2>How to run with Docker</h2>
+    <div>
+        <ul>
+            <li>clone repository</li>
+            <li>run <i>mvn install</i></li>
+            <li>pull mysql docker image: <i>docker pull mysql</i></li>
+            <li>pull mongo docker image: <i>docker pull mongo</i></li>
+            <li>build all the sevices' docker images: <i>docker build -t ${image-tag} -f Dockerfile.layered</i></li>
+            <li>run <i>docker compose up</i></li>
+        </ul>
+    </div>
+    <h2>Description</h2>
     <div>
         <ul> 
             <h3>discovery-server</h3>
