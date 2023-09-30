@@ -1,7 +1,7 @@
 package com.wirehood.orderservice.controller;
 
-import com.wirehood.orderservice.dto.OrderRequest;
-import com.wirehood.orderservice.dto.OrderResponse;
+import com.wirehood.orderservice.dto.OrderCreateDto;
+import com.wirehood.orderservice.dto.OrderDto;
 import com.wirehood.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/order")
@@ -23,18 +23,13 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public String placeOrder(@RequestBody OrderRequest orderRequest) {
-        try {
-            orderService.placeOrder(orderRequest);
-            return "Order placed successfully";
-        } catch (IllegalArgumentException illegalArgumentException) {
-            return illegalArgumentException.getMessage();
-        }
+    public Mono<String> placeOrder(@RequestBody OrderCreateDto orderCreateDto) {
+        return orderService.placeOrder(orderCreateDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<OrderResponse> getAllOrders() {
+    public Flux<OrderDto> getAllOrders() {
         return orderService.getAllOrders();
     }
 }

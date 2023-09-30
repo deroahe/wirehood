@@ -1,9 +1,6 @@
 package com.wirehood.orderservice.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,10 +11,12 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "t_order_line_item")
+@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class OrderLineItem {
 
     @Id
