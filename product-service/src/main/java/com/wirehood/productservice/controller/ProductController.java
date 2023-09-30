@@ -1,7 +1,7 @@
 package com.wirehood.productservice.controller;
 
-import com.wirehood.productservice.dto.ProductRequest;
-import com.wirehood.productservice.dto.ProductResponse;
+import com.wirehood.productservice.dto.ProductCreateDto;
+import com.wirehood.productservice.dto.ProductDto;
 import com.wirehood.productservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("api/product")
@@ -23,14 +23,13 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public String createProduct(@RequestBody ProductRequest productRequest) {
-        String inventoryResponse = productService.createProduct(productRequest);
-        return "Product " + productRequest.toString() + " created successfully. " + inventoryResponse;
+    public Mono<String> createProduct(@RequestBody ProductCreateDto productCreateDto) {
+        return productService.createProduct(productCreateDto);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductResponse> getAllProducts() {
+    public Flux<ProductDto> getAllProducts() {
         return productService.getAllProducts();
     }
 }
