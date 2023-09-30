@@ -49,8 +49,7 @@ public class ProductService {
                 .subscribeOn(Schedulers.boundedElastic());
 
         var inventoryMono = inventoryClient.createInventory(inventoryCreateDto)
-                .doOnSuccess(i -> log.info("Inventory {} created", i))
-                .doOnError(t -> log.error("Error while saving product", t));
+                .doOnSuccess(i -> log.info("Inventory {} created", i));
 
         return zip(productMono, inventoryMono, (p, i) -> format("Product saved: %s. Inventory saved: %s", p != null, i != null));
     }

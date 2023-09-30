@@ -33,7 +33,7 @@ public class InventoryClient {
                 .body(Mono.just(inventoryCreateDto), InventoryCreateDto.class)
                 .retrieve()
                 .bodyToMono(InventoryDto.class)
-                .doOnError(t -> log.error("Error calling inventory-service", t))
+                .doOnError(t -> log.error("Error while calling inventory-service", t))
                 .doOnSuccess(System.out::println);
     }
 }
