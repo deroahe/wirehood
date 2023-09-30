@@ -2,6 +2,7 @@ package com.wirehood.inventoryservice.service;
 
 import com.wirehood.inventoryservice.dto.InventoryCreateDto;
 import com.wirehood.inventoryservice.dto.InventoryDto;
+import com.wirehood.inventoryservice.dto.InventoryStockDto;
 import com.wirehood.inventoryservice.model.Inventory;
 import com.wirehood.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class InventoryService {
     private final InventoryRepository inventoryRepository;
 
     @Transactional(readOnly = true)
-    public Flux<InventoryDto> areInStock(List<String> skuCodes) {
+    public Flux<InventoryStockDto> areInStock(List<String> skuCodes) {
         log.info("Checking stock for skuCodes: {}", skuCodes);
 
         var logString = new StringBuilder("In stock: ");
@@ -34,13 +35,13 @@ public class InventoryService {
 
         return inventoryListMono
                 .flatMapIterable(inventoryList -> inventoryList.stream()
-                        .map(inventory -> InventoryDto.builder()
+                        .map(inventory -> InventoryStockDto.builder()
                                 .skuCode(inventory.getSkuCode())
                                 .isInStock(inventory.getQuantity() > 0)
                                 .build())
                         .toList())
                 .doOnNext(inventoryDto -> {
-                    if (inventoryDto.isInStock()) {
+                    if (inventoryDto.getIsInStock()) {
                         logString.append(inventoryDto.getSkuCode()).append(" ");
                     }
                 })
@@ -60,7 +61,7 @@ public class InventoryService {
                 .doOnSuccess(inStock -> log.info("{} is in stock: {}", skuCode, inStock));
     }
 
-    public Mono<Inventory> save(InventoryCreateDto inventoryCreateDto) {
+    public Mono<InventoryDto> save(InventoryCreateDto inventoryCreateDto) {
         log.info("Saving inventory {}", inventoryCreateDto);
 
         var inventory = Inventory.builder()
@@ -68,7 +69,16 @@ public class InventoryService {
                 .quantity(inventoryCreateDto.getQuantity())
                 .build();
 
-        return Mono.fromCallable(() -> inventoryRepository.save(inventory))
+        var inventoryMono = Mono.fromCallable(() -> inventoryRepository.save(inventory))
                 .subscribeOn(Schedulers.boundedElastic());
+
+        return inventoryMono.map(this::convertInventoryToInventoryDto);
+    }
+
+    private InventoryDto convertInventoryToInventoryDto(Inventory inventory) {
+        return InventoryDto.builder()
+                .skuCode(inventory.getSkuCode())
+                .quantity(inventory.getQuantity())
+                .build();
     }
 }

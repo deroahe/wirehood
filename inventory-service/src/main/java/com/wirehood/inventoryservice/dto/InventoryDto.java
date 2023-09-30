@@ -7,5 +7,5 @@ import lombok.*;
 public class InventoryDto {
 
     String skuCode;
-    boolean isInStock;
+    Integer quantity;
 }
