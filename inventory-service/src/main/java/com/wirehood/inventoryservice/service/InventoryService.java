@@ -70,7 +70,8 @@ public class InventoryService {
                 .build();
 
         var inventoryMono = Mono.fromCallable(() -> inventoryRepository.save(inventory))
-                .subscribeOn(Schedulers.boundedElastic());
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(i -> log.info("Inventory {} saved successfully", i));
 
         return inventoryMono.map(this::convertInventoryToInventoryDto);
     }
