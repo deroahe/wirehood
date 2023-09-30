@@ -1,10 +1,7 @@
 package com.wirehood.orderservice.service;
 
 import com.wirehood.orderservice.client.InventoryClient;
-import com.wirehood.orderservice.dto.OrderLineItemCreateDto;
-import com.wirehood.orderservice.dto.OrderLineItemDto;
-import com.wirehood.orderservice.dto.OrderCreateDto;
-import com.wirehood.orderservice.dto.OrderDto;
+import com.wirehood.orderservice.dto.*;
 import com.wirehood.orderservice.model.Order;
 import com.wirehood.orderservice.model.OrderLineItem;
 import com.wirehood.orderservice.repository.OrderRepository;
@@ -17,6 +14,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.UUID;
+
+import static java.lang.Boolean.FALSE;
 
 @Service
 @RequiredArgsConstructor
@@ -38,9 +37,12 @@ public class OrderService {
                 .map(OrderLineItem::getSkuCode)
                 .toList();
 
-        var inventoryMono = inventoryClient.checkStockMultiple(skuCodes);
+        var inventoryFlux = inventoryClient.checkStockMultiple(skuCodes);
 
-        var allProductsInStockMono = inventoryMono.reduce(true, (result, product) -> result && product.getIsInStock());
+        var allProductsInStockMono = inventoryFlux
+                .map(InventoryStockDto::getIsInStock)
+                .switchIfEmpty(Mono.just(FALSE))
+                .reduce(true, (x1, x2) -> x1 && x2);
 
         return allProductsInStockMono.flatMap(inStock -> {
                     if (inStock) {
