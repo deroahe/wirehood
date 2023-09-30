@@ -1,7 +1,8 @@
 package com.wirehood.inventoryservice.controller;
 
-import com.wirehood.inventoryservice.dto.InventoryRequest;
-import com.wirehood.inventoryservice.dto.InventoryResponse;
+import com.wirehood.inventoryservice.dto.InventoryCreateDto;
+import com.wirehood.inventoryservice.dto.InventoryDto;
+import com.wirehood.inventoryservice.model.Inventory;
 import com.wirehood.inventoryservice.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -22,16 +25,21 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @GetMapping
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<InventoryResponse> isInStock(@RequestParam List<String> skuCode) {
+    public Mono<Boolean> isInStock(@RequestParam String skuCode) {
         return inventoryService.isInStock(skuCode);
+    }
+
+    @GetMapping("/are-in-stock")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<InventoryDto> areInStock(@RequestParam List<String> skuCode) {
+        return inventoryService.areInStock(skuCode);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public String addStock(@RequestBody InventoryRequest inventoryRequest) {
-        inventoryService.save(inventoryRequest);
-        return "Inventory " + inventoryRequest.toString() + " created successfully.";
+    public Mono<Inventory> addStock(@RequestBody InventoryCreateDto inventoryCreateDto) {
+        return inventoryService.save(inventoryCreateDto);
     }
 }

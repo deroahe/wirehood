@@ -33,6 +33,7 @@
         <javax.servlet.version>2.5</javax.servlet.version>
         <javax.xml.bind.version>2.3.1</javax.xml.bind.version>
         <org.hibernate.version>6.1.6.Final</org.hibernate.version>
+        <io.projectreactor.version>2022.0.11</io.projectreactor.version>
     </properties>
 
     <dependencyManagement>
@@ -77,6 +78,13 @@
                 <scope>provided</scope>
                 <type>pom</type>
                 <version>${org.hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.projectreactor</groupId>
+                <artifactId>reactor-bom</artifactId>
+                <version>${io.projectreactor.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
