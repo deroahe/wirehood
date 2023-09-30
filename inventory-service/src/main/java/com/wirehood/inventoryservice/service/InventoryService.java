@@ -7,6 +7,7 @@ import com.wirehood.inventoryservice.model.Inventory;
 import com.wirehood.inventoryservice.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -16,7 +17,10 @@ import reactor.core.scheduler.Schedulers;
 import java.util.List;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static reactor.core.publisher.Flux.fromIterable;
+import static reactor.core.publisher.Flux.fromStream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,18 +37,20 @@ public class InventoryService {
         var inventoryListMono = Mono.fromCallable(() -> inventoryRepository.findBySkuCodeIn(skuCodes))
                 .subscribeOn(Schedulers.boundedElastic());
 
-        return inventoryListMono
-                .flatMapIterable(inventoryList -> inventoryList.stream()
-                        .map(inventory -> InventoryStockDto.builder()
-                                .skuCode(inventory.getSkuCode())
-                                .isInStock(inventory.getQuantity() > 0)
-                                .build())
-                        .toList())
-                .doOnNext(inventoryDto -> {
-                    if (inventoryDto.getIsInStock()) {
-                        logString.append(inventoryDto.getSkuCode()).append(" ");
-                    }
-                })
+        return fromStream(() -> skuCodes.stream()
+                .flatMap(skuCode -> inventoryListMono
+                        .flatMapMany(inventoryList -> fromIterable(inventoryList)
+                                .filter(inventory -> StringUtils.equals(skuCode, inventory.getSkuCode()))
+                                .switchIfEmpty(Mono.just(Inventory.builder()
+                                        .skuCode(skuCode)
+                                        .quantity(0)
+                                        .build()))
+                                .map(inventory -> InventoryStockDto.builder()
+                                        .skuCode(inventory.getSkuCode())
+                                        .isInStock(inventory.getQuantity() > 0)
+                                        .build())
+                                .doOnNext(i -> logString.append(format("sku code %s %s ", skuCode, i.getIsInStock())))
+                        ).toStream()))
                 .doOnComplete(() -> log.info(String.valueOf(logString)));
     }
 
