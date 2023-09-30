@@ -1,19 +1,21 @@
 package com.wirehood.productservice.service;
 
-import com.wirehood.productservice.dto.InventoryRequest;
-import com.wirehood.productservice.dto.ProductRequest;
-import com.wirehood.productservice.dto.ProductResponse;
+import com.wirehood.productservice.client.InventoryClient;
+import com.wirehood.productservice.dto.inventory.InventoryCreateDto;
+import com.wirehood.productservice.dto.ProductCreateDto;
+import com.wirehood.productservice.dto.ProductDto;
 import com.wirehood.productservice.model.Product;
 import com.wirehood.productservice.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import static java.lang.String.format;
+import static reactor.core.publisher.Mono.zip;
 
 @Service
 @RequiredArgsConstructor
@@ -22,44 +24,49 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final WebClient.Builder webClientBuilder;
+    private final InventoryClient inventoryClient;
 
-    public String createProduct(ProductRequest productRequest) {
-        Product product = Product.builder()
-                .name(productRequest.getName())
-                .description(productRequest.getDescription())
-                .price(productRequest.getPrice())
+    public Mono<String> createProduct(ProductCreateDto productCreateDto) {
+        log.info("Creating product {}", productCreateDto);
+
+        var product = Product.builder()
+                .name(productCreateDto.getName())
+                .description(productCreateDto.getDescription())
+                .price(productCreateDto.getPrice())
                 .build();
 
-        productRepository.save(product);
-        log.info("Product {} saved.", product.getId());
-
-        InventoryRequest inventoryRequest = InventoryRequest.builder()
+        var inventoryCreateDto = InventoryCreateDto.builder()
                 .skuCode(product.getName())
-                .quantity(productRequest.getQuantity() != null
-                        && productRequest.getQuantity() > 0
-                        ? productRequest.getQuantity()
+                .quantity(productCreateDto.getQuantity() != null
+                        && productCreateDto.getQuantity() > 0
+                        ? productCreateDto.getQuantity()
                         : 0)
                 .build();
 
-        // call inventory to update stock
+        var productMono = Mono.fromCallable(() -> productRepository.save(product))
+                .doOnSuccess(p -> log.info("Product {} created", p))
+                .doOnError(t -> log.error("Error while saving product", t))
+                .subscribeOn(Schedulers.boundedElastic());
 
-        return webClientBuilder.build().post()
-                .uri("http://inventory-service/api/inventory")
-                .body(Mono.just(inventoryRequest), InventoryRequest.class)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        var inventoryMono = inventoryClient.createInventory(inventoryCreateDto)
+                .doOnSuccess(i -> log.info("Inventory {} created", i));
+
+        return zip(productMono, inventoryMono, (p, i) -> format("Product saved: %s. Inventory saved: %s", p != null, i != null));
     }
 
-    public List<ProductResponse> getAllProducts() {
-        List<Product> products = productRepository.findAll();
+    public Flux<ProductDto> getAllProducts() {
+        log.info("Getting all products");
+        var productListMono = Mono.fromCallable(productRepository::findAll)
+                .subscribeOn(Schedulers.boundedElastic());
 
-        return products.stream().map(this::mapToProductResponse).collect(Collectors.toList());
+        return productListMono
+                .flatMapIterable(products -> products.stream()
+                        .map(this::convertProductToProductDto)
+                        .toList());
     }
 
-    private ProductResponse mapToProductResponse(Product product) {
-        return ProductResponse.builder()
+    private ProductDto convertProductToProductDto(Product product) {
+        return ProductDto.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())

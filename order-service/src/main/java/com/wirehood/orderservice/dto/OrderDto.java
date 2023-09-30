@@ -5,12 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class InventoryResponse {
+public class OrderDto {
 
-    private String skuCode;
-    private boolean isInStock;
+    private Long id;
+    private String orderNumber;
+    private List<OrderLineItemDto> orderLineItemsList;
 }

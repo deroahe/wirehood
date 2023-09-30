@@ -1,7 +1,7 @@
 package com.wirehood.productservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wirehood.productservice.dto.ProductRequest;
+import com.wirehood.productservice.dto.ProductCreateDto;
 import com.wirehood.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -42,8 +42,8 @@ class ProductServiceApplicationTests {
 
 	@Test
 	void shouldCreateProduct() throws Exception {
-		ProductRequest productRequest = getProductRequest();
-		String productRequestString = objectMapper.writeValueAsString(productRequest);
+		var productCreateDto = getProductRequest();
+		String productRequestString = objectMapper.writeValueAsString(productCreateDto);
 		mockMvc.perform(MockMvcRequestBuilders.post("/api/product")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(productRequestString))
@@ -51,8 +51,8 @@ class ProductServiceApplicationTests {
 		Assertions.assertEquals(productRepository.findAll().size(), 1);
 	}
 
-	private ProductRequest getProductRequest() {
-		return ProductRequest.builder()
+	private ProductCreateDto getProductRequest() {
+		return ProductCreateDto.builder()
 				.name("TV")
 				.description("It's a TV")
 				.price(BigDecimal.valueOf(3000))
