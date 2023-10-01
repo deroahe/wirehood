@@ -30,13 +30,13 @@ public class InventoryClient {
                 .build();
     }
 
-    public Mono<Boolean> checkStockSingle(String skuCode) {
+    public Mono<InventoryStockDto> checkStockSingle(String skuCode) {
         return inventoryClient.get()
                 .uri(IN_STOCK_SINGLE_URI,
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCode).build())
                 .retrieve()
-                .bodyToMono(Boolean.class)
-                .doOnError(t -> log.info("Error while checking stock for single skuCode {}", skuCode, t));
+                .bodyToMono(InventoryStockDto.class)
+                .doOnError(t -> log.info("Error while checking stock for single skuCode: <{}>", skuCode, t));
     }
 
     public Flux<InventoryStockDto> checkStockMultiple(List<String> skuCodes) {
@@ -45,6 +45,6 @@ public class InventoryClient {
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
                 .retrieve()
                 .bodyToFlux(InventoryStockDto.class)
-                .doOnError(t -> log.info("Error while checking stock for multiple skuCodes {}", skuCodes, t));
+                .doOnError(t -> log.info("Error while checking stock for multiple skuCodes: <{}>", skuCodes, t));
     }
 }

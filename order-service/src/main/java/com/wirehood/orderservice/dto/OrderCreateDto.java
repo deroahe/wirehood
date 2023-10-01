@@ -8,6 +8,7 @@ import java.util.List;
 @Value
 @Builder
 @Jacksonized
+@ToString
 public class OrderCreateDto {
 
     List<OrderLineItemCreateDto> orderLineItemCreateDtoList;

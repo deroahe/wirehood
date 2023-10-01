@@ -16,6 +16,7 @@ import reactor.core.scheduler.Schedulers;
 import java.util.UUID;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 @Service
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class OrderService {
     private final InventoryClient inventoryClient;
 
     public Mono<String> placeOrder(OrderCreateDto orderCreateDto) {
-        log.info("Placing order {}", orderCreateDto);
+        log.info("Placing order: <{}>", orderCreateDto);
 
         var orderLineItemList = orderCreateDto.getOrderLineItemCreateDtoList().stream()
                 .map(this::convertOrderLineItemCreateDtoToOrderLineItem)
@@ -45,16 +46,15 @@ public class OrderService {
                 .reduce(true, (x1, x2) -> x1 && x2);
 
         return allProductsInStockMono.flatMap(inStock -> {
-                    if (inStock) {
+                    if (TRUE.equals(inStock)) {
                         var order = Order.builder()
                                 .orderNumber(UUID.randomUUID().toString())
                                 .orderLineItemsList(orderLineItemList)
                                 .build();
                         return Mono.fromCallable(() -> orderRepository.save(order))
                                 .subscribeOn(Schedulers.boundedElastic())
-                                .doOnSuccess(o -> {
-                                    log.info("Order {} created successfully", o);
-                                })
+                                .doOnSuccess(o -> log.info("Order created successfully: <{}>", o))
+                                .doOnError(t -> log.error("Error while saving product", t))
                                 .then(Mono.just("All items are in stock. Order placed successfully"));
 
                     } else {
@@ -68,6 +68,7 @@ public class OrderService {
         log.info("Getting all orders");
 
         var orderListMono = Mono.fromCallable(orderRepository::findAll)
+                .doOnError(t -> log.error("Error while getting all orders"))
                 .subscribeOn(Schedulers.boundedElastic());
 
         return orderListMono
