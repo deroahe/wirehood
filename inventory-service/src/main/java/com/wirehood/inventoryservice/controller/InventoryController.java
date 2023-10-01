@@ -40,6 +40,6 @@ public class InventoryController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<InventoryDto> addStock(@RequestBody InventoryCreateDto inventoryCreateDto) {
-        return inventoryService.save(inventoryCreateDto);
+        return inventoryService.addStock(inventoryCreateDto);
     }
 }

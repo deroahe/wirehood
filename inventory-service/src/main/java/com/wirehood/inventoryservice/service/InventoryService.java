@@ -31,10 +31,11 @@ public class InventoryService {
 
     @Transactional(readOnly = true)
     public Flux<InventoryStockDto> areInStock(List<String> skuCodes) {
-        log.info("Checking stock for skuCodes: {}", skuCodes);
+        log.info("Checking stock for skuCodes: <{}>", skuCodes);
 
         var logString = new StringBuilder("In stock: ");
         var inventoryListMono = Mono.fromCallable(() -> inventoryRepository.findBySkuCodeIn(skuCodes))
+                .doOnError(t -> log.error("Error while getting stock for multiple skus", t))
                 .subscribeOn(Schedulers.boundedElastic());
 
         return fromStream(() -> skuCodes.stream()
@@ -49,37 +50,43 @@ public class InventoryService {
                                         .skuCode(inventory.getSkuCode())
                                         .isInStock(inventory.getQuantity() > 0)
                                         .build())
-                                .doOnNext(i -> logString.append(format("sku code %s %s ", skuCode, i.getIsInStock())))
+                                .doOnNext(i -> logString.append(format("<%s:%s> ", skuCode, i.getIsInStock())))
                         ).toStream()))
                 .doOnComplete(() -> log.info(String.valueOf(logString)));
     }
 
     public Mono<Boolean> isInStock(String skuCode) {
-        log.info("Checking stock for skuCode: {}", skuCode);
+        log.info("Checking stock for skuCode: <{}>", skuCode);
 
         var inventoryMono = Mono.fromCallable(() -> ofNullable(inventoryRepository.findBySkuCode(skuCode)))
+                .doOnError(t -> log.error("Error while checking stock for single sku", t))
                 .subscribeOn(Schedulers.boundedElastic());
 
         return inventoryMono
                 .map(inventoryOptional -> inventoryOptional
                         .map(inventory -> inventory.getQuantity() > 0)
                         .orElse(FALSE))
-                .doOnSuccess(inStock -> log.info("{} is in stock: {}", skuCode, inStock));
+                .doOnSuccess(inStock -> log.info("In stock: <{}:{}>", skuCode, inStock));
     }
 
-    public Mono<InventoryDto> save(InventoryCreateDto inventoryCreateDto) {
-        log.info("Saving inventory {}", inventoryCreateDto);
+    public Mono<InventoryDto> addStock(InventoryCreateDto inventoryCreateDto) {
+        log.info("Saving inventory: <{}>", inventoryCreateDto);
 
         var inventory = Inventory.builder()
                 .skuCode(inventoryCreateDto.getSkuCode())
                 .quantity(inventoryCreateDto.getQuantity())
                 .build();
 
-        var inventoryMono = Mono.fromCallable(() -> inventoryRepository.save(inventory))
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnSuccess(i -> log.info("Inventory {} saved successfully", i));
+        var inventoryMono = save(inventory);
 
         return inventoryMono.map(this::convertInventoryToInventoryDto);
+    }
+
+    private Mono<Inventory> save(Inventory inventory) {
+        return Mono.fromCallable(() -> inventoryRepository.save(inventory))
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnSuccess(i -> log.info("Inventory saved successfully: <{}>", i))
+                .doOnError(t -> log.error("Error while saving inventory", t));
     }
 
     private InventoryDto convertInventoryToInventoryDto(Inventory inventory) {
