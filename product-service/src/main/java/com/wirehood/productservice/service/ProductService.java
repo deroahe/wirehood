@@ -1,7 +1,8 @@
 package com.wirehood.productservice.service;
 
+import com.wirehood.inventoryservice.api.InventoryApi;
 import com.wirehood.inventoryservice.dto.InventoryCreateDto;
-import com.wirehood.inventoryservice.sdk.InventoryClient;
+import com.wirehood.inventoryservice.dto.InventoryDto;
 import com.wirehood.productservice.dto.ProductCreateDto;
 import com.wirehood.productservice.dto.ProductDto;
 import com.wirehood.productservice.model.Product;
@@ -24,7 +25,7 @@ import static reactor.core.publisher.Mono.zip;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final InventoryClient inventoryClient;
+    private final InventoryApi inventoryApi;
 
     public Mono<String> createProduct(ProductCreateDto productCreateDto) {
         log.info("Creating product: <{}>", productCreateDto);
@@ -48,7 +49,7 @@ public class ProductService {
                 .doOnError(t -> log.error("Error while saving product", t))
                 .subscribeOn(Schedulers.boundedElastic());
 
-        var inventoryMono = inventoryClient.createInventoryNew(inventoryCreateDto)
+        var inventoryMono = inventoryApi.addStock(inventoryCreateDto)
                 .doOnSuccess(i -> log.info("Inventory created: <{}>", i));
 
         return zip(productMono, inventoryMono, (p, i) -> format("Product saved: %s. Inventory saved: %s", p != null, i != null));

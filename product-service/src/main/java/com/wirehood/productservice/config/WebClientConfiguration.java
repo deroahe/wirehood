@@ -1,5 +1,7 @@
 package com.wirehood.productservice.config;
 
+import com.wirehood.inventoryservice.api.InventoryApi;
+import com.wirehood.inventoryservice.sdk.InventoryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,5 +14,10 @@ public class WebClientConfiguration {
     @LoadBalanced
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();
+    }
+
+    @Bean
+    public InventoryApi inventoryApi(WebClient.Builder builder) {
+        return new InventoryClient(builder);
     }
 }
