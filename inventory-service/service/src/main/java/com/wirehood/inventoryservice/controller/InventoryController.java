@@ -1,5 +1,6 @@
 package com.wirehood.inventoryservice.controller;
 
+import com.wirehood.inventoryservice.api.InventoryApi;
 import com.wirehood.inventoryservice.dto.InventoryCreateDto;
 import com.wirehood.inventoryservice.dto.InventoryDto;
 import com.wirehood.inventoryservice.dto.InventoryStockDto;
@@ -18,10 +19,12 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static com.wirehood.inventoryservice.api.InventoryApi.INVENTORY_PATH;
+
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping(INVENTORY_PATH)
 @RequiredArgsConstructor
-public class InventoryController {
+public class InventoryController implements InventoryApi {
 
     private final InventoryService inventoryService;
 

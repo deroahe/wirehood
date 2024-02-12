@@ -1,7 +1,7 @@
 package com.wirehood.productservice.service;
 
-import com.wirehood.productservice.client.InventoryClient;
-import com.wirehood.productservice.dto.inventory.InventoryCreateDto;
+import com.wirehood.inventoryservice.dto.InventoryCreateDto;
+import com.wirehood.inventoryservice.sdk.InventoryClient;
 import com.wirehood.productservice.dto.ProductCreateDto;
 import com.wirehood.productservice.dto.ProductDto;
 import com.wirehood.productservice.model.Product;
@@ -48,7 +48,7 @@ public class ProductService {
                 .doOnError(t -> log.error("Error while saving product", t))
                 .subscribeOn(Schedulers.boundedElastic());
 
-        var inventoryMono = inventoryClient.createInventory(inventoryCreateDto)
+        var inventoryMono = inventoryClient.createInventoryNew(inventoryCreateDto)
                 .doOnSuccess(i -> log.info("Inventory created: <{}>", i));
 
         return zip(productMono, inventoryMono, (p, i) -> format("Product saved: %s. Inventory saved: %s", p != null, i != null));
