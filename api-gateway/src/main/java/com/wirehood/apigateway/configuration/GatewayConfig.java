@@ -1,7 +1,6 @@
 package com.wirehood.apigateway.configuration;
 
 import com.wirehood.apigateway.jwt.JwtAuthenticationFilter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -10,8 +9,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GatewayConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter filter;
+    private final JwtAuthenticationFilter filter;
+
+    public GatewayConfig(JwtAuthenticationFilter filter) {
+        this.filter = filter;
+    }
 
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
