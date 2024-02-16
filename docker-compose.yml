@@ -15,8 +15,9 @@ services:
 
   authentication-service:
     image: authentication-service
-    secrets:  # todo implement
-      - jwt_secret
+    # todo implement
+#    secrets:
+#      - jwt_secret
     depends_on:
       - discovery-server
       - mysql-server
@@ -70,7 +71,8 @@ volumes:
   mysql-volume:
   mongo-volume:
 
-secrets:
-  jwt_secret:
-    external: true
-    file: # todo implement
+# todo implement
+#secrets:
+#  jwt_secret:
+#    external: true
+#    file: # todo implement
