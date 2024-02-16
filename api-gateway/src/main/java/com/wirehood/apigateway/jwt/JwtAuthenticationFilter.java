@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 
         if (isApiSecured.test(request)) {
             if (!request.getHeaders().containsKey("Authorization")) {
-                LOGGER.warn("Denying incoming request because of missing Authorization header");
+                LOGGER.warn("Denying incoming request to endpoint '{}' because of missing Authorization header", request.getURI());
                 var response = exchange.getResponse();
                 response.setStatusCode(UNAUTHORIZED);
 
@@ -48,19 +48,20 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 
             return jwtService.getClaims(token)
                     .map(claims -> {
-                        LOGGER.info("Allowing incoming request from '{}'", claims.getSubject());
+                        LOGGER.info("Allowing incoming request to endpoint '{}' from '{}'", request.getURI(), claims.getSubject());
                         exchange.getRequest().mutate().header("id", String.valueOf(claims.get("id"))).build();
 
                         return chain.filter(exchange);
                     })
                     .getOrElseGet(ignoredThrowable -> {
-                        LOGGER.warn("Denying incoming request because of invalid JWT");
+                        LOGGER.warn("Denying incoming request to endpoint '{}' because of invalid JWT", request.getURI());
                         var response = exchange.getResponse();
                         response.setStatusCode(UNAUTHORIZED);
 
                         return response.setComplete();
                     });
         }
+        LOGGER.info("Allowing incoming request to public endpoint '{}'", request.getURI());
 
         return chain.filter(exchange);
     }
