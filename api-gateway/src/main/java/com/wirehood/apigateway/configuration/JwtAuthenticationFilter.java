@@ -1,5 +1,6 @@
-package com.wirehood.apigateway.jwt;
+package com.wirehood.apigateway.configuration;
 
+import com.wirehood.apigateway.jwt.JwtService;
 import org.slf4j.Logger;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
