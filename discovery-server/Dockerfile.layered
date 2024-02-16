@@ -1,6 +1,6 @@
-FROM openjdk:17 as builder
+FROM openjdk:17 AS builder
 WORKDIR extracted
-ADD target/discovery-server*.jar app.jar
+ADD target/*.jar app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 FROM openjdk:17
