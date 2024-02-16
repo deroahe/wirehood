@@ -1,4 +1,4 @@
-package com.wirehood.authenticationservice.jwt;
+package com.wirehood.authenticationservice.security;
 
 import com.wirehood.authenticationservice.dto.UserDto;
 import io.jsonwebtoken.Jwts;

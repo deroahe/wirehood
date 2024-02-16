@@ -1,7 +1,7 @@
 package com.wirehood.authenticationservice.service;
 
 import com.wirehood.authenticationservice.dto.LoginRequest;
-import com.wirehood.authenticationservice.jwt.JwtService;
+import com.wirehood.authenticationservice.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
