@@ -1,6 +1,6 @@
 FROM openjdk:17 as builder
 WORKDIR extracted
-ADD target/*.jar app.jar
+ADD target/api-gateway*.jar app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 FROM openjdk:17
