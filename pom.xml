@@ -24,6 +24,8 @@
     </modules>
 
     <properties>
+        <com.wirehood.inventory-api.version>1.0-SNAPSHOT</com.wirehood.inventory-api.version>
+        <com.wirehood.inventory-sdk.version>1.0-SNAPSHOT</com.wirehood.inventory-sdk.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,20 +96,19 @@
                 <artifactId>vavr</artifactId>
                 <version>${io.vavr.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.wirehood</groupId>
+                <artifactId>inventory-api</artifactId>
+                <version>${com.wirehood.inventory-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.wirehood</groupId>
+                <artifactId>inventory-sdk</artifactId>
+                <version>${com.wirehood.inventory-sdk.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
